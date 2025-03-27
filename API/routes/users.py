@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from app.database import SessionDep
-from app.models.users import User
+from API.database import SessionDep
+from API.models.users import User
 
 router = APIRouter()
 

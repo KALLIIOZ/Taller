@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, Query, Path
-from app.routes import users, clientes
+from API.routes import users, clientes
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import create_db_and_tables
+from API.database import create_db_and_tables
 
 app = FastAPI()
 
