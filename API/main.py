@@ -14,12 +14,12 @@ app.add_middleware(
 )
 
 
-app.include_router(users.router, tags=["users"])
-app.include_router(clientes.router, tags=["clientes"])
-app.include_router(vehiculos.router, tags=["vehiculos"])
-app.include_router(reparacion.router, tags=["reparacion"])
-app.include_router(det_rep.router, tags=["det_rep"])
-app.include_router(piezas.router, tags=["piezas"])
+app.include_router(users.router, prefix="/taller", tags=["users"])
+app.include_router(clientes.router, prefix="/taller", tags=["clientes"])
+app.include_router(vehiculos.router, prefix="/taller", tags=["vehiculos"])
+app.include_router(reparacion.router, prefix="/taller", tags=["reparacion"])
+app.include_router(det_rep.router, prefix="/taller", tags=["det_rep"])
+app.include_router(piezas.router, prefix="/taller", tags=["piezas"])
 
 @app.on_event("startup")
 def on_startup():
