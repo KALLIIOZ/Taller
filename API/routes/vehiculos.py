@@ -25,6 +25,7 @@ async def update_vehiculo(vehiculo_id: int, vehiculo: Vehiculo, session: Session
         raise HTTPException(status_code=404, detail="Vehiculo not found")
     vehiculo_db.marca = vehiculo.marca
     vehiculo_db.modelo = vehiculo.modelo
+    vehiculo_db.color = vehiculo.color
     vehiculo_db.cliente_id = vehiculo.cliente_id
     session.add(vehiculo_db)
     session.commit()
