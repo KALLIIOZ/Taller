@@ -2,25 +2,16 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 from logic.user import User
+from UI.Login import Login
 
-
-def get_auth(user, password):
+def get_auth(username, password):
     user=User()
-    response = user.auth(user, password)
+    response = user.auth(username, password)
     if response["status"] == 404:
         messagebox.showerror("Error", "Usuario no encontrado")
     else:
         return response
     
-
-def Login(frame):
-    ttk.Label(frame, text="Usuario").place(x=250, y=200)
-    entry_user_auth = ttk.Entry(frame)
-    entry_user_auth.place(x=250, y=230)
-
-    ttk.Label(frame, text="Contraseña").place(x=250, y=260)
-    entry_pass_auth = ttk.Entry(frame)
-    entry_pass_auth.place(x=250, y=290)
 
 def main():
     root = tk.Tk()
@@ -34,12 +25,22 @@ def main():
     frame_piezas = ttk.Frame(notebook)
 
     notebook.add(frame_login, text="Login")
-    Authorize = Login(frame_login)
-    if Authorize:
-        notebook.add(frame_users, text="Usuarios")
-        notebook.add(frame_clientes, text="Clientes")
-        notebook.add(frame_vehiculos, text="Vehiculos")
-        notebook.add(frame_piezas, text="Piezas")
+    user_entry, pass_entry = Login(frame_login)
+    def authenticate():
+        username = user_entry.get()
+        password = pass_entry.get()
+
+        Authorize = get_auth(username, password)
+        
+        if Authorize:
+            notebook.add(frame_users, text="Usuarios")
+            notebook.add(frame_clientes, text="Clientes")
+            notebook.add(frame_vehiculos, text="Vehiculos")
+            notebook.add(frame_piezas, text="Piezas")
+    
+    login_button = ttk.Button(frame_login, text="Ingresar", command=authenticate)
+    login_button.place(x=272, y=350)
+
 
     notebook.pack(expand=True, fill="both")
     root.mainloop()
