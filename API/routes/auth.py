@@ -11,6 +11,6 @@ async def auth(username: str, password: str, session: SessionDep):
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     if user.password == password:
-        return user.user_id
+        return user
     else:
         return {"status": "fail"}

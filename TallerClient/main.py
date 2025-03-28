@@ -7,10 +7,7 @@ from UI.Login import Login
 def get_auth(username, password):
     user=User()
     response = user.auth(username, password)
-    if response["status"] == 404:
-        messagebox.showerror("Error", "Usuario no encontrado")
-    else:
-        return response
+    return response["user_id"]
     
 
 def main():
@@ -23,6 +20,7 @@ def main():
     frame_clientes = ttk.Frame(notebook)
     frame_vehiculos = ttk.Frame(notebook)
     frame_piezas = ttk.Frame(notebook)
+    frame_salir = ttk.Frame(notebook)
 
     notebook.add(frame_login, text="Login")
     user_entry, pass_entry = Login(frame_login)
@@ -32,11 +30,13 @@ def main():
 
         Authorize = get_auth(username, password)
         
-        if Authorize:
+        if Authorize <= 1:
+            notebook.forget(frame_login)
             notebook.add(frame_users, text="Usuarios")
             notebook.add(frame_clientes, text="Clientes")
             notebook.add(frame_vehiculos, text="Vehiculos")
             notebook.add(frame_piezas, text="Piezas")
+            notebook.add(frame_salir, text="Cerrar sesion")
     
     login_button = ttk.Button(frame_login, text="Ingresar", command=authenticate)
     login_button.place(x=272, y=350)
