@@ -1,6 +1,4 @@
 import requests
-import json
-
 
 class User:
     def auth(self, username: str, password: str):
@@ -16,9 +14,8 @@ class User:
         return response.json()
 
     def get_user(self, id: int):
-        url = f"http://localhost:8000/taller/user/"
-        data={"id":id}
-        response = requests.get(url, json=data)
+        url = f"http://localhost:8000/taller/user/{id}"
+        response = requests.get(url)
         return response.json()
     
     def edit_user(self, id: int, name: str, username: str, password: str):

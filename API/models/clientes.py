@@ -1,4 +1,4 @@
-from sqlmodel import Field, SQLModel, Relationship
+from sqlmodel import Field, SQLModel
 
 class Client(SQLModel, table=True):
     client_id: int = Field(primary_key=True)

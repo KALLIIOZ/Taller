@@ -1,5 +1,4 @@
-import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk
 
 def Login(frame):
     ttk.Label(frame, text="Usuario").place(x=250, y=200)

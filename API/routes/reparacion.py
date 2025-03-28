@@ -31,3 +31,12 @@ async def update_reparacion(reparacion_id: int, reparacion: Reparacion, session:
     session.commit()
     session.refresh(reparacion_db)
     return reparacion_db
+
+@router.delete("/reparacion/{reparacion_id}")
+async def delete_reparacion(reparacion_id: int, session: SessionDep):
+    reparacion = session.get(Reparacion, reparacion_id)
+    if not reparacion:
+        raise HTTPException(status_code=404, detail="Reparacion not found")
+    session.delete(reparacion)
+    session.commit()
+    return {"message": "Reparacion deleted successfully"}
