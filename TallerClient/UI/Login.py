@@ -1,5 +1,15 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
+from TallerClient.logic.user import User
+
+def get_auth(user, password):
+    user=User()
+    response = user.auth(user, password)
+    if response["status"] == 404:
+        messagebox.showerror("Error", "Usuario no encontrado")
+    else:
+        return response
+    
 
 def Login(frame):
     ttk.Label(frame, text="Usuario").place(x=300, y=300)
