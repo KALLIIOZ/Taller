@@ -39,4 +39,4 @@ async def delete_vehiculo(vehiculo_id: int, session: SessionDep):
         raise HTTPException(status_code=404, detail="Vehiculo not found")
     session.delete(vehiculo)
     session.commit()
-    return {"message": "Vehiculo deleted successfully"}
+    return {"message": "Vehiculo eliminado"}
