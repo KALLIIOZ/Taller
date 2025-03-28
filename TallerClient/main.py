@@ -3,7 +3,7 @@ from logic.user import User
 
 def main():
     user = User()
-    print(user.auth("somy", "root"))
+    print(user.get_user(4))
 
 if __name__ == "__main__":
     main()

@@ -16,6 +16,18 @@ class User:
         return response.json()
 
     def get_user(self, id: int):
+        url = f"http://localhost:8000/taller/user/"
+        data={"id":id}
+        response = requests.get(url, json=data)
+        return response.json()
+    
+    def edit_user(self, id: int, name: str, username: str, password: str):
         url = f"http://localhost:8000/taller/user/{id}"
-        response = requests.request("GET", url)
+        data = {"name": name,"username": username, "password": password}
+        response = requests.put(url, json=data)
+        return response.json()
+
+    def delete_user(self, id: int):
+        url = f"http://localhost:8000/taller/user/{id}"
+        response = requests.delete(url)
         return response.json()
