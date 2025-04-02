@@ -1,7 +1,7 @@
 import requests
 
 class Clientes:
-    def create_cliente(self, name: str, rfc: str, phone: str, user_id: str):
+    def create_cliente(self, name: str, rfc: str, phone: str, user_id: int):
         url = "http://localhost:8000/taller/clientes"
         data = {
             "name": name,
@@ -17,7 +17,7 @@ class Clientes:
         response = requests.get(url)
         return response.json()
 
-    def edit_cliente(self, id: int, name: str, rfc: str, phone: str, user_id: str):
+    def edit_cliente(self, id: int, name: str, rfc: str, phone: str, user_id: int):
         url =f"http://localhost:8000/taller/clientes/{id}"
         data = {
             "name": name,
