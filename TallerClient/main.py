@@ -67,7 +67,7 @@ def get_clients():
     """)
     clients = cursor.fetchall()
     conn.close()
-    return {f"{name} - {id}":id for id, name in clients}
+    return {f"{id}": id for id, name in clients}
 
 def refresh_combo_vehiculos(combo):
     try:
@@ -133,6 +133,7 @@ def reparacionesUI(frame, username, id):
 
     def search_reparacion():
         reparacion_data = Reparacion.get_rep(buscar_entry, buscar_entry.get())
+        print(reparacion_data)
         if reparacion_data:
             folio_entry.configure(state='normal')
             folio_entry.delete(0, tk.END)
@@ -187,6 +188,9 @@ def reparacionesUI(frame, username, id):
         nuevo_btn = ttk.Button(button_frame, text="Nuevo", 
             command=lambda: create_rep_validated())
         nuevo_btn.pack(side='left', padx=5)
+    
+    buscar_btn = ttk.Button(button_frame, text="Buscar", command=search_reparacion())  # Quitar lambda y get_rep
+    buscar_btn.pack(side='left', padx=5)
 
     def create_rep_validated():
         if validate_dates(fecha_entrada.get(), fecha_salida.get()):
@@ -205,8 +209,6 @@ def reparacionesUI(frame, username, id):
                               vehiculo_combo.get())
 
 
-    buscar_btn = ttk.Button(button_frame, text="Buscar", command=search_reparacion)  # Quitar lambda y get_rep
-    buscar_btn.pack(side='left', padx=5)
 
     det_frame = ttk.LabelFrame(frame, text="Detalle de Reparación")
     det_frame.grid(row=1, column=0, padx=10, pady=5, sticky="nsew")
@@ -214,7 +216,7 @@ def reparacionesUI(frame, username, id):
     ttk.Label(det_frame, text="Buscar por Folio:").grid(row=0, column=0, padx=5, pady=5)
     buscar_det_entry = ttk.Entry(det_frame)
     buscar_det_entry.grid(row=0, column=1, padx=5, pady=5)
-    buscar_det_btn = ttk.Button(det_frame, text="Buscar", command=search_detalle)  # Agregar botón faltante
+    buscar_det_btn = ttk.Button(det_frame, text="Buscar", command=search_detalle())  # Agregar botón faltante
     buscar_det_btn.grid(row=0, column=2, padx=5, pady=5)
 
     ttk.Label(det_frame, text="Reparación ID:").grid(row=1, column=0, padx=5, pady=5)
@@ -284,27 +286,27 @@ def piezasUI(frame, id):
             descripcion_entry.insert(0, pieza_data["descripcion"])
             
             precio_entry.delete(0, tk.END)
-            precio_entry.insert(0, pieza_data["precio"])
+            precio_entry.insert(0, pieza_data["price"])
             
             existencia_entry.delete(0, tk.END)
-            existencia_entry.insert(0, pieza_data["existencia"])
+            existencia_entry.insert(0, pieza_data["existence"])
 
     ttk.Label(frame, text="Buscar ID:").grid(row=4, column=0, padx=5, pady=5)
     buscar_entry = ttk.Entry(frame)
     buscar_entry.grid(row=4, column=1, padx=5, pady=5)
-    buscar_btn = ttk.Button(frame, text="Buscar", command=lambda:search_pieza)
+    buscar_btn = ttk.Button(frame, text="Buscar", command=lambda:search_pieza())
     buscar_btn.grid(row=4, column=2, padx=5, pady=5)
 
     button_frame = ttk.Frame(frame)
     button_frame.grid(row=5, column=0, columnspan=3, pady=20)
     if id == 1:
-        nuevo_btn = ttk.Button(button_frame, text="Nuevo", command=lambda:Piezas.create_piezas(descripcion_entry.get(), precio_entry.get(), existencia_entry.get()))
+        nuevo_btn = ttk.Button(button_frame, text="Nuevo", command=lambda:Piezas.create_piezas(id_entry, descripcion_entry.get(), existencia_entry.get(), precio_entry.get()))
         nuevo_btn.pack(side='left', padx=5)
 
         guardar_btn = ttk.Button(button_frame, text="Editar", command=lambda:Piezas.edit_piezas(id_entry.get(), descripcion_entry.get(), precio_entry.get(), existencia_entry.get()))
         guardar_btn.pack(side='left', padx=5)
 
-        eliminar_btn = ttk.Button(button_frame, text="Eliminar", command=lambda:Piezas.delete_piezas(id_entry.get()))
+        eliminar_btn = ttk.Button(button_frame, text="Eliminar", command=lambda:Piezas.delete_piezas(id_entry, id_entry.get()))
         eliminar_btn.pack(side='left', padx=5)
     else:
         nuevo_btn = ttk.Button(button_frame, text="Nuevo", command=lambda:Piezas.create_piezas(descripcion_entry.get(), precio_entry.get(), existencia_entry.get()))
@@ -337,10 +339,10 @@ def VehiculosUI(frame, id):
         if vehiculo_data:
             matricula_entry.configure(state='normal')
             matricula_entry.delete(0, tk.END)
-            matricula_entry.insert(0, vehiculo_data["matricula"])
+            matricula_entry.insert(0, vehiculo_data["vehiculo_id"])
             matricula_entry.configure(state='disabled')
             
-            cliente_combo.set(vehiculo_data["cliente"])
+            cliente_combo.set(vehiculo_data["cliente_id"])
             
             marca_entry.delete(0, tk.END)
             marca_entry.insert(0, vehiculo_data["marca"])
@@ -354,7 +356,7 @@ def VehiculosUI(frame, id):
     ttk.Label(frame, text="Buscar ID:").grid(row=5, column=0, padx=5, pady=5)
     buscar_entry = ttk.Entry(frame)
     buscar_entry.grid(row=5, column=1, padx=5, pady=5)
-    buscar_btn = ttk.Button(frame, text="Buscar", command=lambda:search_vehiculo)
+    buscar_btn = ttk.Button(frame, text="Buscar", command=lambda:search_vehiculo())
     buscar_btn.grid(row=5, column=2, padx=5, pady=5)
 
     button_frame = ttk.Frame(frame)
