@@ -12,6 +12,42 @@ import json, os
 from datetime import datetime
 
 
+def check_and_update_inventory(pieza_id, cantidad_usada):
+    try:
+        conn = sqlite3.connect('./API/taller.db')
+        cursor = conn.cursor()
+        
+        # Get current inventory
+        cursor.execute("SELECT existence FROM pieza WHERE pieza_id = ?", (pieza_id,))
+        result = cursor.fetchone()
+        
+        if not result:
+            messagebox.showerror("Error", "Pieza no encontrada")
+            return False
+            
+        existencia_actual = result[0]
+        
+        if cantidad_usada > existencia_actual:
+            messagebox.showerror("Error", f"No hay suficientes piezas. Disponibles: {existencia_actual}")
+            return False
+            
+        # Update inventory
+        nueva_existencia = existencia_actual - cantidad_usada
+        cursor.execute("""
+            UPDATE pieza 
+            SET existence = ? 
+            WHERE pieza_id = ?
+        """, (nueva_existencia, pieza_id))
+        
+        conn.commit()
+        return True
+        
+    except Exception as e:
+        messagebox.showerror("Error", f"Error al actualizar inventario: {str(e)}")
+        return False
+    finally:
+        conn.close()
+
 def validate_dates(fecha_entrada, fecha_salida):
     try:
         entrada = datetime.strptime(fecha_entrada, '%Y-%m-%d')
@@ -19,10 +55,6 @@ def validate_dates(fecha_entrada, fecha_salida):
         
         if entrada > salida:
             messagebox.showerror("Error", "La fecha de entrada no puede ser posterior a la fecha de salida")
-            return False
-            
-        if entrada > datetime.now():
-            messagebox.showerror("Error", "La fecha de entrada no puede ser futura")
             return False
             
         return True
@@ -107,7 +139,7 @@ def reparacionesUI(frame, username, id):
     rep_frame.grid(row=0, column=0, padx=10, pady=5, sticky="nsew")
 
     ttk.Label(rep_frame, text="Folio:").grid(row=0, column=0, padx=5, pady=5)
-    folio_entry = ttk.Entry(rep_frame, state='disabled')
+    folio_entry = ttk.Entry(rep_frame)
     folio_entry.grid(row=0, column=1, padx=5, pady=5)
 
     ttk.Label(rep_frame, text="Vehículo:").grid(row=1, column=0, padx=5, pady=5)
@@ -115,11 +147,11 @@ def reparacionesUI(frame, username, id):
     vehiculo_combo['values'] = get_vehiculos()
     vehiculo_combo.grid(row=1, column=1, padx=5, pady=5)
 
-    ttk.Label(rep_frame, text="Fecha Entrada:").grid(row=2, column=0, padx=5, pady=5)
+    ttk.Label(rep_frame, text="Fecha Entrada: YY-MM-DD").grid(row=2, column=0, padx=5, pady=5)
     fecha_entrada = ttk.Entry(rep_frame)
     fecha_entrada.grid(row=2, column=1, padx=5, pady=5)
 
-    ttk.Label(rep_frame, text="Fecha Salida:").grid(row=3, column=0, padx=5, pady=5)
+    ttk.Label(rep_frame, text="Fecha Salida: YY-MM-DD").grid(row=3, column=0, padx=5, pady=5)
     fecha_salida = ttk.Entry(rep_frame)
     fecha_salida.grid(row=3, column=1, padx=5, pady=5)
 
@@ -133,14 +165,11 @@ def reparacionesUI(frame, username, id):
 
     def search_reparacion():
         reparacion_data = Reparacion.get_rep(buscar_entry, buscar_entry.get())
-        print(reparacion_data)
         if reparacion_data:
             folio_entry.configure(state='normal')
             folio_entry.delete(0, tk.END)
-            folio_entry.insert(0, reparacion_data["folio"])
-            folio_entry.configure(state='disabled')
-            
-            vehiculo_combo.set(reparacion_data["vehiculo"])
+            folio_entry.insert(0, reparacion_data["folio"])        
+            vehiculo_combo.set(reparacion_data["vehiculo_id"])
             
             fecha_entrada.delete(0, tk.END)
             fecha_entrada.insert(0, reparacion_data["fecha_entrada"])
@@ -150,19 +179,7 @@ def reparacionesUI(frame, username, id):
             
             descripcion_entry.delete(0, tk.END)
             descripcion_entry.insert(0, reparacion_data["descripcion"])
-    def search_detalle():
-        detalle_data = Detalle.get_detalle(buscar_det_entry, buscar_det_entry.get())
-        if detalle_data:
-            rep_id_entry.delete(0, tk.END)
-            rep_id_entry.insert(0, detalle_data["detrep_id"])
-            
-            pieza_combo.set(detalle_data["pieza_id"])
-            
-            cantidad_entry.delete(0, tk.END)
-            cantidad_entry.insert(0, detalle_data["cantidad"])
-            
-            desc_det_entry.delete(0, tk.END)
-            desc_det_entry.insert(0, detalle_data["descripcion"])
+    
 
     ttk.Label(rep_frame, text="Buscar Folio:").grid(row=6, column=0, padx=5, pady=5)
     buscar_entry = ttk.Entry(rep_frame)
@@ -189,7 +206,7 @@ def reparacionesUI(frame, username, id):
             command=lambda: create_rep_validated())
         nuevo_btn.pack(side='left', padx=5)
     
-    buscar_btn = ttk.Button(button_frame, text="Buscar", command=search_reparacion())  # Quitar lambda y get_rep
+    buscar_btn = ttk.Button(button_frame, text="Buscar", command=search_reparacion)  # Quitar lambda y get_rep
     buscar_btn.pack(side='left', padx=5)
 
     def create_rep_validated():
@@ -213,11 +230,7 @@ def reparacionesUI(frame, username, id):
     det_frame = ttk.LabelFrame(frame, text="Detalle de Reparación")
     det_frame.grid(row=1, column=0, padx=10, pady=5, sticky="nsew")
 
-    ttk.Label(det_frame, text="Buscar por Folio:").grid(row=0, column=0, padx=5, pady=5)
-    buscar_det_entry = ttk.Entry(det_frame)
-    buscar_det_entry.grid(row=0, column=1, padx=5, pady=5)
-    buscar_det_btn = ttk.Button(det_frame, text="Buscar", command=search_detalle())  # Agregar botón faltante
-    buscar_det_btn.grid(row=0, column=2, padx=5, pady=5)
+    
 
     ttk.Label(det_frame, text="Reparación ID:").grid(row=1, column=0, padx=5, pady=5)
     rep_id_entry = ttk.Entry(det_frame)
@@ -233,24 +246,53 @@ def reparacionesUI(frame, username, id):
     cantidad_entry = ttk.Entry(det_frame)
     cantidad_entry.grid(row=3, column=1, padx=5, pady=5)
 
-    ttk.Label(det_frame, text="Descripción:").grid(row=4, column=0, padx=5, pady=5)
-    desc_det_entry = ttk.Entry(det_frame)
-    desc_det_entry.grid(row=4, column=1, padx=5, pady=5)
-
     det_button_frame = ttk.Frame(det_frame)
     det_button_frame.grid(row=5, column=0, columnspan=2, pady=10)
 
+    def search_detalle():
+        detalle_data = Detalle.get_detalle(buscar_det_entry, buscar_det_entry.get())
+        if detalle_data:
+            rep_id_entry.delete(0, tk.END)
+            rep_id_entry.insert(0, detalle_data["detrep_id"])
+            
+            pieza_combo.set(detalle_data["pieza_id"])
+            
+            cantidad_entry.delete(0, tk.END)
+            cantidad_entry.insert(0, detalle_data["cantidad"])
+    ttk.Label(det_frame, text="Buscar por Folio:").grid(row=0, column=0, padx=5, pady=5)
+    buscar_det_entry = ttk.Entry(det_frame)
+    buscar_det_entry.grid(row=0, column=1, padx=5, pady=5)
+    buscar_det_btn = ttk.Button(det_frame, text="Buscar", command=search_detalle)  # Agregar botón faltante
+    buscar_det_btn.grid(row=0, column=2, padx=5, pady=5)
+
+    def create_detalle_validated():
+        try:
+            cantidad = int(cantidad_entry.get())
+            pieza_id = list(piezas_dict.keys())[pieza_combo.current()]
+            
+            if check_and_update_inventory(pieza_id, cantidad):
+                Detalle.create_detalle(rep_id_entry, rep_id_entry.get(), 
+                                     pieza_combo.get(), 
+                                     cantidad)
+            else:
+                return
+        except ValueError:
+            messagebox.showerror("Error", "La cantidad debe ser un número válido")
+            return
+
     if id == 1:
-        agregar_btn = ttk.Button(det_button_frame, text="Nuevo", command=lambda: Detalle.create_detalle(rep_id_entry.get(), pieza_combo.get(), cantidad_entry.get()))
+        agregar_btn = ttk.Button(det_button_frame, text="Nuevo", 
+            command=create_detalle_validated)
         agregar_btn.pack(side='left', padx=5)
 
         guardar_det_btn = ttk.Button(det_button_frame, text="Editar", command=lambda: Detalle.edit_detalle(rep_id_entry.get(), pieza_combo.get(), cantidad_entry.get()))
         guardar_det_btn.pack(side='left', padx=5)
 
-        eliminar_det_btn = ttk.Button(det_button_frame, text="Eliminar", command=lambda: Detalle.delete_detalle(rep_id_entry.get()))
+        eliminar_det_btn = ttk.Button(det_button_frame, text="Eliminar", command=lambda: Detalle.delete_detalle(rep_id_entry, rep_id_entry.get()))
         eliminar_det_btn.pack(side='left', padx=5)
     else:
-        agregar_btn = ttk.Button(det_button_frame, text="Nuevo", command=lambda: Detalle.create_detalle(rep_id_entry.get(), pieza_combo.get(), cantidad_entry.get()))
+        agregar_btn = ttk.Button(det_button_frame, text="Nuevo", 
+            command=create_detalle_validated)
         agregar_btn.pack(side='left', padx=5)
 
 
